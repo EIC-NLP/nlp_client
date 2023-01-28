@@ -1,4 +1,4 @@
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 """ 
 Date: 28 Jan 2023
 """
@@ -38,12 +38,12 @@ def listen(return_json=False): # go to ASR server, By-pass wakeword
     except Exception as e:
         printclr(e,"red")
 
-import time
-import json 
-start = time.time()
-time.sleep(1)
+# import time
+# import json 
+# start = time.time()
+# time.sleep(1)
 
-print(time.time() - start)
+# print(time.time() - start)
 def main():
     #* for building package comment all the main otherwise it will run the main everytime you import the package
     # clearterm() 
