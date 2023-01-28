@@ -45,7 +45,8 @@ time.sleep(1)
 
 print(time.time() - start)
 def main():
-    clearterm() 
+    #* for building package comment all the main otherwise it will run the main everytime you import the package
+    # clearterm() 
 
     # print("this is speak")
     # print(speak("say stop motherfucker"))
