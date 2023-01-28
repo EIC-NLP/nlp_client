@@ -1,4 +1,4 @@
-# nlp_client 1.1.0
+# nlp_client 1.2.0
 
 ## How to install
 

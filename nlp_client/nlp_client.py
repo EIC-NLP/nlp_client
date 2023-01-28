@@ -16,7 +16,7 @@ def speak(text: str) :
 def ww_listen(): # go to Wakeword server
     try:
         response = requests.get("http://localhost:5100/").json() # wakeword get
-        while response["confidence"] < 0.7:
+        while response["confidence"] < 0.62:
             speak("Sorry I didn't get that, could you speak louder or rephrase the sentence?")
             response = requests.get("http://localhost:5101/").json() # asr get
         return response
@@ -26,19 +26,19 @@ def ww_listen(): # go to Wakeword server
 def listen(return_json=False): # go to ASR server, By-pass wakeword
     try:
         response = requests.get("http://localhost:5101/").json() # asr get
-        while response["confidence"] < 0.7:
+        while response["confidence"] < 0.62:
             speak("Sorry I didn't get that, could you speak louder or rephrase the sentence?")
             response = requests.get("http://localhost:5101/").json() # asr get
         return response
     except Exception as e:
         printclr(e,"red")
 
-import time
-import json 
-start = time.time()
-time.sleep(1)
+# import time
+# import json 
+# start = time.time()
+# time.sleep(1)
 
-print(time.time() - start)
+# print(time.time() - start)
 def main():
     clearterm() 
 
