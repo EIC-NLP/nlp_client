@@ -34,18 +34,15 @@ def listen(return_json=False): # go to ASR server, By-pass wakeword
     except Exception as e:
         printclr(e,"red")
 
-def get_intent(self, predicted_text):
+def get_intent(predicted_text):
         response = {
             "recipient_id": "bot",
             "body": predicted_text
         }
-        if self.verbose:
-            printclr(f"{predicted_text=}","cyan")
-            printclr(f"{self.rasa_url=}","cyan")
 
         #TODO try and except UGLY.......
         # try:
-        r = requests.post(url= self.rasa_url, 
+        r = requests.post(url= "http://localhost:5005/webhooks/rest/webhook", 
                     json={"sender": "bot", "message": predicted_text}
                     )
         # printclr(r.json(),"cyan")
@@ -61,7 +58,7 @@ def get_intent(self, predicted_text):
             # printclr(json.dumps(response, indent=4),"blue")
 
             #* get confidence
-            r = requests.post(url= self.rasa_parse_url, 
+            r = requests.post(url= "http://localhost:5005/model/parse", 
                         json={"text": predicted_text}
                         )
             if r.json() == []:
