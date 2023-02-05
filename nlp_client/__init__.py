@@ -1,4 +1,4 @@
-__version__ = '1.3.0'
+__version__ = '1.6.0'
 """ 
 Date: 28 Jan 2023
 """
@@ -6,16 +6,28 @@ import requests
 from ratfin import *
 import json
 
-def speak(text: str) :
+def speak(
+    text: str = "Hi my name is Walkie", 
+    voice : str  = "en-US-JaneNeural", 
+    style : str  = "normal" , 
+    profanity : str  = "2" 
+    ) :
+
     try :
         url = 'http://localhost:5003/tts'
-        x = requests.post(url, json={'text':text})
+        x = requests.post(url, json={
+            'text':text,
+            'voice':voice,
+            'style':style,
+            'profanity':profanity
+            })
         # printclr(e,"red")
         return x.json()
         # return "Syntizied"
 
     except Exception as e:
         printclr(e,"red")
+        return 
 
 
 def ww_listen(): # go to Wakeword server
@@ -90,6 +102,13 @@ def get_intent(predicted_text):
 def main():
     clearterm() 
 
+    # for i in range(10):
+    #     speak(
+    #         text = "WAKE THE FUCK UP",
+    #         voice = "en-US-JaneNeural" ,
+    #         style = "shouting" # can be shouting, normal
+
+    #     )
     # print("this is speak")
     # print(speak("say stop motherfucker"))
     # print(speak("say "))
