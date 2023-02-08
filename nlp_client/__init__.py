@@ -135,8 +135,8 @@ class EmerStop():
 def main():
     clearterm()
     import threading
-    EmerStop = EmerStop("nlp")
-    t = threading.Thread(target=EmerStop.run, name="EmerStopFlask")
+    hi = EmerStop("nlp")
+    t = threading.Thread(target=hi.run, name="EmerStopFlask")
     t.start()
     #check
 
