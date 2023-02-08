@@ -1,4 +1,4 @@
-__version__ = '1.9.0'
+__version__ = '1.9.1'
 """ 
 Date: 28 Jan 2023
 """
@@ -131,14 +131,14 @@ class EmerStop():
 
 
 def main():
-    clearterm()
-    import threading, time
-    hi = EmerStop("nlp")
-    t = threading.Thread(target=hi.run, name="EmerStopFlask")
-    t.start()
-    while True:
-        time.sleep(4)
-        print(hi.intent, hi.confidence)
+    # clearterm()
+    # import threading, time
+    # hi = EmerStop("nlp")
+    # t = threading.Thread(target=hi.run, name="EmerStopFlask")
+    # t.start()
+    # while True:
+    #     time.sleep(4)
+    #     print(hi.intent, hi.confidence)
 
     #check
 
@@ -161,6 +161,7 @@ def main():
     # if x['intent'] == "stop":
     #     printclr("STOPPINGGGG........","red")
     #     speak("stop")
+    pass
 
 
 main()
