@@ -1,4 +1,4 @@
-__version__ = '1.7.0'
+__version__ = '1.9.0'
 """ 
 Date: 28 Jan 2023
 """
@@ -110,22 +110,20 @@ class EmerStop():
         self.confidence = None
         self.intent = None
 
-    def checkstatus() -> str:
-        try:
-            response = requests.get("http://localhost:5101/").json()  # asr get
-            if response["confidence"] < 0.62:
-                return response
-        except Exception as e:
-            printclr(e, "red")
-            return "error"
-
     def run(self):
         while True:
-            x = self.checkstatus()
-            if x["intent"] == "stop":
-                printclr("STOPPINGGGG........", "red")
-                self.confidence = x["confidence"]
-                self.intent = x["intent"]
+            try:
+                x = requests.get("http://localhost:5102/").json()
+                print("checking if intent in x")
+                print(repr(x))
+                if "intent" in x:
+                    print("in")
+                    if x["intent"] == "stop" and x["confidence"] > 0.62:
+                        printclr("STOPPINGGGG........", "red")
+                        self.confidence = x["confidence"]
+                        self.intent = x["intent"]
+            except:
+                pass
 
     def clear_status(self):
         self.confidence = None
@@ -134,10 +132,14 @@ class EmerStop():
 
 def main():
     clearterm()
-    import threading
+    import threading, time
     hi = EmerStop("nlp")
     t = threading.Thread(target=hi.run, name="EmerStopFlask")
     t.start()
+    while True:
+        time.sleep(4)
+        print(hi.intent, hi.confidence)
+
     #check
 
     # for i in range(10):
