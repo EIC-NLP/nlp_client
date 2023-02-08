@@ -1,4 +1,4 @@
-__version__ = '1.9.1'
+__version__ = '1.10.0'
 """ 
 Date: 28 Jan 2023
 """
@@ -113,11 +113,11 @@ class EmerStop():
     def run(self):
         while True:
             try:
-                x = requests.get("http://localhost:5102/").json()
-                print("checking if intent in x")
-                print(repr(x))
+                x = requests.get("http://localhost:5101/").json()
+                # print("checking if intent in x")
+                # print(repr(x))
                 if "intent" in x:
-                    print("in")
+                    # print("in")
                     if x["intent"] == "stop" and x["confidence"] > 0.62:
                         printclr("STOPPINGGGG........", "red")
                         self.confidence = x["confidence"]
