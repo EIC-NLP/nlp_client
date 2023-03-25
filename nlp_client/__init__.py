@@ -1,3 +1,5 @@
+
+
 __version__ = '1.10.0'
 """ 
 Date: 28 Jan 2023
@@ -6,53 +8,164 @@ import requests
 from ratfin import *
 import json
 
+## In house variable 
+tts_url = 'http://localhost:5003/tts'
+
+import json
+class Response:
+    """Response for the NLP-pipeline. 
+    Possible Entities: [object, furniture, storage, adj_object, people, people_action, placement, position, demonstrative, rpos, p_door, room]
+    
+    Text from ASR
+    Intent from NLU Rasa
+    
+    Example of how to use Response for NLP Robocup ::
+
+        >>> x = Response()
+        >>> print(x)
+        Response(
+            status_code=0
+            text=''
+            intent=''
+            confidence=0.0
+            object=''
+            people=''
+        )
+        >>> x.join_json("{
+            \"intent\": \"restaurant_order\", 
+            \"object\": \"coca-cola\", 
+            \"people\": \"me\",
+            \"place\": \"your mum\"
+            }")
+        >>> print(x)
+        Response(
+            status_code=0
+            text=''
+            intent='restaurant_order'
+            confidence=0.0
+            object='coca-cola'
+            people='me'
+            place='your mum'
+        )
+        >>> x.your_mum = "fat"
+        >>> print(x)
+        Response(
+            status_code=0
+            text=''
+            intent='restaurant_order'
+            confidence=0.0
+            object='coca-cola'
+            people='me'
+            place='your mum'
+            your_mum = "fat" <--
+        )
+
+    """
+
+    def __init__(
+        self,
+        status: str = "",
+        status_code: int = 0,
+        text: str = "",
+        intent: str = "",
+        confidence: float = 0.00,
+        object: str = "",
+        people: str = "",
+        **kwargs  # To handle future attributes
+    ):
+        self.status_code = status_code
+        self.text = text
+        self.intent = intent
+        self.confidence = confidence
+        self.object = object
+        self.people = people
+
+        # Store any additional attributes as instance variables
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def join_json(self, text: str, verbose = False):
+        json_dict = json.loads(text)
+        for key, value in json_dict.items():
+            setattr(self, key, value)
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+    def __str__(self):
+        attributes = [
+            f'{attr}={getattr(self, attr)!r}'
+            for attr in vars(self)
+            if not callable(getattr(self, attr)) and not attr.startswith("__")
+        ]
+        output = '\n\t'.join(attributes)
+        return f'''Response(\n\t{output}\n)'''
+
 
 def speak(text: str = "Hi my name is Walkie",
           voice: str = "en-US-JaneNeural",
           style: str = "normal",
           profanity: str = "2"):
+    """Speak text using TTS server. Use sync = False to return immediately."""
 
     try:
-        url = 'http://localhost:5003/tts'
-        x = requests.post(url,
+        printclr("synthesizing...","blue")
+        
+        #* Requesting TTS server  
+        x = requests.post(tts_url,
                           json={
                               'text': text,
                               'voice': voice,
                               'style': style,
                               'profanity': profanity
                           })
-        # printclr(e,"red")
         return x.json()
-        # return "Syntizied"
 
     except Exception as e:
         printclr(e, "red")
         return
 
 
-def ww_listen():  # go to Wakeword server
+def ww_listen(intent=True):  # go to ASR server, By-pass wakeword
     try:
-        response = requests.get(
-            "http://localhost:5100/").json()  # wakeword get
-        while response["confidence"] < 0.62:
-            speak(
-                "Sorry I didn't get that, could you speak louder or rephrase the sentence?"
-            )
-            response = requests.get("http://localhost:5101/").json()  # asr get
-        return response
+        res_json = requests.get("http://localhost:5100/").json()  # asr get
+        # print(f"{res_json=}")
+        if intent:
+            if res_json["status_code"] == 500:
+                printclr("Error: Rasa is not ready yet", "red")
+                
+            else:
+                while res_json["confidence"] < 0.62:
+                    try:
+                        speak("Sorry I didn't get that, could you speak louder or rephrase the sentence?")
+                    except:
+                        printclr("ERROR: TTS Ofline, Confidence of the response is low","red")
+                    res_json = requests.get("http://localhost:5101/").json()  # asr get
+        res = Response()
+        res.join_json(res_json)
+        return res
     except Exception as e:
         printclr(e, "red")
 
 
-def listen(return_json=False):  # go to ASR server, By-pass wakeword
+def listen(intent=True):  # go to ASR server, By-pass wakeword
     try:
-        response = requests.get("http://localhost:5101/").json()  # asr get
-        while response["confidence"] < 0.62:
-            speak(
-                "Sorry I didn't get that, could you speak louder or rephrase the sentence?"
-            )
-            response = requests.get("http://localhost:5101/").json()  # asr get
-        return response
+        res_json = requests.get("http://localhost:5101/").json()  # asr get
+        # print(f"{res_json=}")
+        if intent:
+            if res_json["status_code"] == 500:
+                printclr("Error: Rasa is not ready yet", "red")
+                
+            else:
+                while res_json["confidence"] < 0.62:
+                    try:
+                        speak("Sorry I didn't get that, could you speak louder or rephrase the sentence?")
+                    except:
+                        printclr("ERROR: TTS Ofline, Confidence of the response is low","red")
+                    res_json = requests.get("http://localhost:5101/").json()  # asr get
+        res = Response()
+        res.join_json(res_json)
+        return res
     except Exception as e:
         printclr(e, "red")
 
@@ -78,25 +191,6 @@ def get_intent(predicted_text):
         # printclr(response,"red")
         response.update(rasa_json)
         # printclr(json.dumps(response, indent=4),"blue")
-
-        #* Get confidence
-        r = requests.post(url="http://localhost:5005/model/parse",
-                          json={"text": predicted_text})
-        if r.json() == []:
-            print("Low confidence level")
-            response.update({"confidence": 0})
-        else:
-            confidence = r.json()['intent_ranking'][0]['confidence']
-            indent_name = r.json()['intent_ranking'][0]['name']
-            printclr(f"\t{confidence=}", "blue")
-            printclr(f"\t{indent_name=}", "blue")
-            # printclr(f"\t{json.dumps(response, indent=4)}","blue")
-
-            # printclr(dict(json.dumps(r.json()[0]['text'])),"red")
-            if indent_name == str(response["intent"]):
-                response.update({"confidence": confidence})
-            else:
-                printclr("its not the same", "red")
     # print(response)
     printclr(f"\t{json.dumps(response, indent=4)}", "blue")
     printclr(f"\tlisten() sending back...", "green")
